@@ -1,7 +1,7 @@
 # Create the API Management instance
 resource "azurerm_api_management" "apim" {
-  depends_on = [azurerm_linux_function_app.upload_function]
-  name                = "${local.name_prefix}-${var.apim_name}"
+  depends_on          = [azurerm_linux_function_app.upload_function]
+  name                = "${local.name_prefix}-${var.apim_name}-${random_string.unique.result}"
   location            = azurerm_resource_group.rg.location
   resource_group_name = azurerm_resource_group.rg.name
   publisher_email     = var.publisher_email
@@ -13,7 +13,7 @@ resource "azurerm_api_management" "apim" {
 # API
 # Step 1: Create the API without any policy
 resource "azurerm_api_management_api" "translation_api" {
-  name                  = "${local.name_prefix}-${var.api_name}"
+  name                  = "${local.name_prefix}-${var.api_name}${random_string.unique.result}"
   resource_group_name   = azurerm_resource_group.rg.name
   api_management_name   = azurerm_api_management.apim.name
   revision              = "1"
@@ -21,13 +21,13 @@ resource "azurerm_api_management_api" "translation_api" {
   path                  = var.api_path
   subscription_required = false
   service_url           = "https://${azurerm_linux_function_app.upload_function.default_hostname}/api"
-  protocols = ["https"]
+  protocols             = ["https"]
 
-#   provisioner "local-exec" {
-#     command = <<EOT
-#       ./update_api_constants.sh "$(terraform output api_management_url)"
-#     EOT
-#   }
+  #   provisioner "local-exec" {
+  #     command = <<EOT
+  #       ./update_api_constants.sh "$(terraform output api_management_url)"
+  #     EOT
+  #   }
 
 }
 
